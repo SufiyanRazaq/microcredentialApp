@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:microcredential/Screens/signup.dart';
 import 'home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class LoginScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
   String _email = '';
   String _password = '';
 
-  Future<void> _login() async {
+  Future<void> _signUp() async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: _email, password: _password);
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: _email, password: _password);
       Future.delayed(Duration.zero, () {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => HomeScreen()));
@@ -28,7 +26,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _googleLogin() async {
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<void> _googleSignup() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
@@ -66,17 +66,14 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            ElevatedButton(onPressed: _login, child: Text('Login')),
             ElevatedButton(
-                onPressed: _googleLogin, child: Text('Login with Google')),
+                onPressed: _googleSignup, child: Text('Signup with Google')),
+            ElevatedButton(onPressed: _signUp, child: Text('Sign Up')),
             TextButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen()),
-                );
+                Navigator.pop(context);
               },
-              child: Text('Don\'t have an account? Sign Up'),
+              child: Text('Already have an account? Login'),
             ),
           ],
         ),
