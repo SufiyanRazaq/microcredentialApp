@@ -24,11 +24,17 @@ class ProfileScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            FutureBuilder(
+            FutureBuilder<DocumentSnapshot>(
               future: _firestore.collection('users').doc(user.uid).get(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                if (!snapshot.data!.exists) {
+                  return Text('User data not found');
                 }
                 var userData = snapshot.data!;
                 return Column(
