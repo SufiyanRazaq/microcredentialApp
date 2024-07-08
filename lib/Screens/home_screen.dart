@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:microcredential/Screens/evidence.dart';
-import 'package:microcredential/Screens/login_screen.dart';
-import 'profile_screen.dart';
+import 'package:microcredential/Screens/Authentication/login_screen.dart';
+import 'Authentication/profile_screen.dart';
 import 'learning_module_screen.dart';
 import 'credential_screen.dart';
 

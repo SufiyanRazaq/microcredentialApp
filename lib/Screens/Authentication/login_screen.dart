@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:microcredential/Screens/adminScreen.dart';
+import 'package:microcredential/Screens/Admin/adminLogin.dart';
 import 'package:sign_in_button/sign_in_button.dart';
-import 'home_screen.dart';
+import '../home_screen.dart';
 import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
