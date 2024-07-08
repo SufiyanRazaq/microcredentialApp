@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:microcredential/Screens/credential_screen.dart';
+import 'package:microcredential/Screens/evidence.dart';
 import 'home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_button/sign_in_button.dart';
@@ -18,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  bool _isAdmin = false;
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -73,6 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'name': nameText,
         'email': emailText,
+        'role': _isAdmin ? 'admin' : 'user',
       });
 
       Navigator.pushReplacement(
@@ -80,6 +84,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       _showSnackbar('Sign up failed: ${e.toString()}', "Error", Colors.red);
     }
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showSnackbar(String message, String title, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('$title: $message'),
+      backgroundColor: backgroundColor,
+    ));
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -136,145 +152,127 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    return emailRegex.hasMatch(email);
-  }
-
-  void _showSnackbar(String message, String title, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$title: $message'),
-      backgroundColor: backgroundColor,
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                prefixIcon: const Icon(
-                  Icons.person,
-                  color: Colors.black,
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Register",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 50),
+              Image.asset(
+                'assets/logo.png',
+                height: 150,
+                width: 180,
               ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: const Icon(
-                  Icons.email,
-                  color: Colors.black,
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                prefixIcon: const Icon(
-                  Icons.password,
-                  color: Colors.black,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.black,
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  prefixIcon: const Icon(Icons.person, color: Colors.teal),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  onPressed: _togglePasswordVisibility,
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: _obscureConfirmPassword,
-              decoration: InputDecoration(
-                labelText: 'Confirm Password',
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black),
-                ),
-                prefixIcon: const Icon(
-                  Icons.password,
-                  color: Colors.black,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureConfirmPassword
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: Colors.black,
+              const SizedBox(height: 15),
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email, color: Colors.teal),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  onPressed: _toggleConfirmPasswordVisibility,
                 ),
               ),
-            ),
-            const SizedBox(height: 30),
-            Container(
-              width: 200,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: const [
-                  BoxShadow(
-                    offset: Offset(
-                      0,
-                      0,
+              const SizedBox(height: 15),
+              TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock, color: Colors.teal),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.teal,
                     ),
-                    blurRadius: 2,
+                    onPressed: _togglePasswordVisibility,
                   ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock, color: Colors.teal),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.teal,
+                    ),
+                    onPressed: _toggleConfirmPasswordVisibility,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: _isAdmin,
+                    onChanged: (value) {
+                      setState(() {
+                        _isAdmin = value!;
+                      });
+                    },
+                  ),
+                  Text("Register as Admin"),
                 ],
               ),
-              child: TextButton(
+              ElevatedButton(
                 onPressed: _signUp,
-                child: const Text('Sign Up'),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: 200,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: const [
-                  BoxShadow(
-                    offset: Offset(
-                      0,
-                      0,
-                    ),
-                    blurRadius: 2,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.teal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ],
+                ),
+                child: const Text('Sign Up', style: TextStyle(fontSize: 16)),
               ),
-              child: SignInButton(
+              const SizedBox(height: 20),
+              SignInButton(
                 Buttons.google,
                 text: "Signup with Google",
                 onPressed: _googleSignup,
@@ -282,17 +280,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-            ),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Already have an account? Login'),
-            ),
-            if (loading) const CircularProgressIndicator(),
-          ],
+              const SizedBox(height: 15),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Already have an account? Login',
+                  style: TextStyle(color: Colors.teal),
+                ),
+              ),
+              if (loading) const CircularProgressIndicator(),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class AdminDashboard extends StatelessWidget {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Admin Dashboard')),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ReviewSubmissionsScreen()),
+              );
+            },
+            child: Text('Review Submissions'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CredentialCreationScreen()),
+              );
+            },
+            child: Text('Manage Credentials'),
+          ),
+        ],
       ),
     );
   }
