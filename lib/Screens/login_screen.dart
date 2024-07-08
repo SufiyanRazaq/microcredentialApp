@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:microcredential/Screens/signup.dart';
 import 'home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -12,24 +13,36 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  String _email = '';
-  String _password = '';
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login() async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: _email, password: _password);
-      Future.delayed(Duration.zero, () {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
-      });
+      if (_emailController.text.trim().isEmpty) {
+        _showSnackbar('Enter your email address', Colors.red);
+        return;
+      } else if (!_isValidEmail(_emailController.text.trim())) {
+        _showSnackbar('Enter valid email address', Colors.red);
+        return;
+      } else if (_passwordController.text.trim().isEmpty) {
+        _showSnackbar('Enter your password', Colors.red);
+        return;
+      }
+
+      /* UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim());*/
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
-      print(e);
+      _showSnackbar('Incorrect email or password', Colors.red);
     }
   }
 
   Future<void> _googleLogin() async {
     try {
+      // Sign out from GoogleSignIn to ensure the user can select a different account
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser != null) {
         final GoogleSignInAuthentication googleAuth =
@@ -38,37 +51,63 @@ class _LoginScreenState extends State<LoginScreen> {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        await _auth.signInWithCredential(credential);
-        Future.delayed(Duration.zero, () {
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        if (!userDoc.exists) {
+          _showSnackbar(
+              'This Google account is not registered. Please sign up first.',
+              Colors.red);
+          await _auth.signOut();
+        } else {
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (context) => HomeScreen()));
-        });
+        }
       }
     } catch (e) {
-      print(e);
+      _showSnackbar('Google login failed: ${e.toString()}', Colors.red);
     }
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showSnackbar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: backgroundColor,
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              onChanged: (value) => _email = value,
-              decoration: InputDecoration(labelText: 'Email'),
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
-              onChanged: (value) => _password = value,
-              decoration: InputDecoration(labelText: 'Password'),
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            ElevatedButton(onPressed: _login, child: Text('Login')),
+            ElevatedButton(onPressed: _login, child: const Text('Login')),
             ElevatedButton(
-                onPressed: _googleLogin, child: Text('Login with Google')),
+                onPressed: _googleLogin,
+                child: const Text('Login with Google')),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -76,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(builder: (context) => SignUpScreen()),
                 );
               },
-              child: Text('Don\'t have an account? Sign Up'),
+              child: const Text('Don\'t have an account? Sign Up'),
             ),
           ],
         ),

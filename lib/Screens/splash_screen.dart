@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   _checkAuthentication() async {
     User? user = FirebaseAuth.instance.currentUser;
     await Future.delayed(
-        Duration(seconds: 2)); // Added delay to allow build to complete
+        Duration(seconds: 2));
     if (user == null) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => LoginScreen()));
