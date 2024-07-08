@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:microcredential/Screens/Admin/HomeScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
-import 'login_screen.dart';
-import 'adminScreen.dart';
+import 'Authentication/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

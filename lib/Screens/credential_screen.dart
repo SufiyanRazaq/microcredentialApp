@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CredentialCreationScreen extends StatefulWidget {
@@ -12,86 +11,99 @@ class CredentialCreationScreen extends StatefulWidget {
 class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _requirementsController = TextEditingController();
+  List<TextEditingController> _requirementsControllers = [];
 
   Future<void> _createCredential() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      List<String> requirements = _requirementsControllers
+          .map((controller) => controller.text)
+          .toList();
+
       await FirebaseFirestore.instance.collection('credentials').add({
         'name': _nameController.text,
         'description': _descriptionController.text,
-        'requirements': _requirementsController.text,
+        'requirements': requirements,
         'createdBy': user.uid,
       });
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Credential created successfully')));
+          const SnackBar(content: Text('Credential created successfully')));
       _nameController.clear();
       _descriptionController.clear();
-      _requirementsController.clear();
+      _requirementsControllers.forEach((controller) => controller.clear());
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _requirementsControllers.forEach((controller) => controller.dispose());
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Credential')),
+      appBar: AppBar(title: const Text('Create Credential')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Credential Name'),
+              decoration: const InputDecoration(labelText: 'Credential Name'),
             ),
             TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Description'),
             ),
-            TextField(
-              controller: _requirementsController,
-              decoration: InputDecoration(labelText: 'Requirements'),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _requirementsControllers.length,
+                itemBuilder: (context, index) {
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: _requirementsControllers[index],
+                            decoration:
+                                const InputDecoration(labelText: 'Requirement'),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.remove_circle),
+                        onPressed: () {
+                          setState(() {
+                            _requirementsControllers.removeAt(index);
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _requirementsControllers.add(TextEditingController());
+                });
+              },
+              child: Text(_requirementsControllers.isEmpty
+                  ? 'Add Requirement'
+                  : 'Add More Requirements'),
             ),
             ElevatedButton(
               onPressed: _createCredential,
-              child: Text('Create Credential'),
+              child: const Text('Create Credential'),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class Credential {
-  final String id;
-  final String name;
-  final String description;
-  final String requirements;
-  final String createdBy;
-
-  Credential(
-      {required this.id,
-      required this.name,
-      required this.description,
-      required this.requirements,
-      required this.createdBy});
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'description': description,
-      'requirements': requirements,
-      'createdBy': createdBy,
-    };
-  }
-
-  factory Credential.fromMap(String id, Map<String, dynamic> map) {
-    return Credential(
-      id: id,
-      name: map['name'],
-      description: map['description'],
-      requirements: map['requirements'],
-      createdBy: map['createdBy'],
     );
   }
 }

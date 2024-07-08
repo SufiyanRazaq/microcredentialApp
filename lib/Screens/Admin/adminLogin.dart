@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:microcredential/Screens/credential_screen.dart';
-import 'package:microcredential/Screens/evidence.dart';
-import 'package:microcredential/Screens/login_screen.dart';
+import 'package:microcredential/Screens/Admin/HomeScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -81,7 +79,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       // Save admin state in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isAdmin', true);
-      await prefs.setString('adminEmail', email);
 
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => AdminHomeScreen()));
@@ -182,126 +179,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
               const SizedBox(height: 30),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class AdminHomeScreen extends StatelessWidget {
-  Future<void> _logout(BuildContext context) async {
-    // Remove admin state from SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('isAdmin');
-    await prefs.remove('adminEmail');
-
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => LoginScreen()));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ReviewSubmissionsScreen()),
-                );
-              },
-              child: const Text('Review Submissions'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CredentialCreationScreen()),
-                );
-              },
-              child: const Text('Create Credentials'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminProfileScreen()),
-                );
-              },
-              child: const Text('Profile'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AdminProfileScreen extends StatelessWidget {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Profile'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<SharedPreferences>(
-          future: SharedPreferences.getInstance(),
-          builder: (context, prefsSnapshot) {
-            if (prefsSnapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if (prefsSnapshot.hasError) {
-              return Text('Error: ${prefsSnapshot.error}');
-            }
-            final prefs = prefsSnapshot.data!;
-            final adminEmail = prefs.getString('adminEmail');
-            return FutureBuilder<QuerySnapshot>(
-              future: _firestore
-                  .collection('admin_users')
-                  .where('email', isEqualTo: adminEmail)
-                  .limit(1)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Text('No profile data found');
-                }
-                final adminData =
-                    snapshot.data!.docs[0].data() as Map<String, dynamic>;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Name: ${adminData['name']}'),
-                    Text('Email: ${adminEmail ?? 'No email found'}'),
-                  ],
-                );
-              },
-            );
-          },
         ),
       ),
     );
