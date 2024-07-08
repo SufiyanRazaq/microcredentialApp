@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:microcredential/Screens/adminScreen.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'home_screen.dart';
 import 'signup.dart';
@@ -122,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: Icon(Icons.email, color: Colors.teal),
+                  prefixIcon: const Icon(Icons.email, color: Colors.teal),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -134,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
-                  prefixIcon: Icon(Icons.lock, color: Colors.teal),
+                  prefixIcon: const Icon(Icons.lock, color: Colors.teal),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -155,7 +156,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.teal,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -172,6 +174,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminLoginScreen()),
+                  );
+                },
+                child: const Text(
+                  'Admin Login',
+                  style: TextStyle(color: Colors.teal),
+                ),
+              ),
               TextButton(
                 onPressed: () {
                   Navigator.push(

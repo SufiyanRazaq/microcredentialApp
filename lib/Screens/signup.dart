@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:microcredential/Screens/credential_screen.dart';
-import 'package:microcredential/Screens/evidence.dart';
 import 'home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_button/sign_in_button.dart';
@@ -20,7 +18,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  bool _isAdmin = false;
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -76,7 +73,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'name': nameText,
         'email': emailText,
-        'role': _isAdmin ? 'admin' : 'user',
       });
 
       Navigator.pushReplacement(
@@ -84,18 +80,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } catch (e) {
       _showSnackbar('Sign up failed: ${e.toString()}', "Error", Colors.red);
     }
-  }
-
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    return emailRegex.hasMatch(email);
-  }
-
-  void _showSnackbar(String message, String title, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$title: $message'),
-      backgroundColor: backgroundColor,
-    ));
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -150,6 +134,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
         loading = false;
       });
     }
+  }
+
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
+  void _showSnackbar(String message, String title, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('$title: $message'),
+      backgroundColor: backgroundColor,
+    ));
   }
 
   @override
@@ -244,20 +240,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Checkbox(
-                    value: _isAdmin,
-                    onChanged: (value) {
-                      setState(() {
-                        _isAdmin = value!;
-                      });
-                    },
-                  ),
-                  Text("Register as Admin"),
-                ],
-              ),
               ElevatedButton(
                 onPressed: _signUp,
                 style: ElevatedButton.styleFrom(
@@ -295,41 +277,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class AdminDashboard extends StatelessWidget {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Admin Dashboard')),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ReviewSubmissionsScreen()),
-              );
-            },
-            child: Text('Review Submissions'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CredentialCreationScreen()),
-              );
-            },
-            child: Text('Manage Credentials'),
-          ),
-        ],
       ),
     );
   }

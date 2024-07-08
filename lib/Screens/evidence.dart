@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
 
 class VerifyEvidenceScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -58,20 +62,55 @@ class EvidenceSubmissionScreen extends StatefulWidget {
 
 class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   final TextEditingController _evidenceController = TextEditingController();
+  PlatformFile? _pickedFile;
+  UploadTask? _uploadTask;
+
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      setState(() {
+        _pickedFile = result.files.first;
+      });
+    }
+  }
 
   Future<void> _submitEvidence() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      String? fileUrl;
+      if (_pickedFile != null) {
+        fileUrl = await _uploadFile(_pickedFile!);
+      }
+
       await FirebaseFirestore.instance.collection('submissions').add({
         'userId': user.uid,
         'credentialId': widget.credentialId,
         'evidence': _evidenceController.text,
+        'fileUrl': fileUrl,
         'status': 'Pending',
         'submittedAt': Timestamp.now(),
       });
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Evidence submitted successfully')));
       _evidenceController.clear();
+      setState(() {
+        _pickedFile = null;
+      });
+    }
+  }
+
+  Future<String?> _uploadFile(PlatformFile file) async {
+    try {
+      final filePath = 'evidence/${file.name}';
+      final ref = FirebaseStorage.instance.ref().child(filePath);
+      _uploadTask = ref.putFile(File(file.path!));
+      final snapshot = await _uploadTask!.whenComplete(() {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File upload failed: ${e.toString()}')));
+      return null;
     }
   }
 
@@ -87,10 +126,33 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
               controller: _evidenceController,
               decoration: InputDecoration(labelText: 'Evidence Description'),
             ),
+            const SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: _pickFile,
+              child: Text('Pick Evidence File'),
+            ),
+            if (_pickedFile != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('Picked file: ${_pickedFile!.name}'),
+              ),
             ElevatedButton(
               onPressed: _submitEvidence,
               child: Text('Submit Evidence'),
             ),
+            if (_uploadTask != null)
+              StreamBuilder<TaskSnapshot>(
+                stream: _uploadTask!.snapshotEvents,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    double progress = data.bytesTransferred / data.totalBytes;
+                    return LinearProgressIndicator(value: progress);
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
           ],
         ),
       ),
