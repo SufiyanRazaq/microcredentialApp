@@ -46,7 +46,9 @@ class ProfileScreen extends StatelessWidget {
               },
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                // Navigate to Edit Profile Screen
+              },
               child: Text('Edit Profile'),
             ),
             ElevatedButton(
