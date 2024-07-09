@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool loading = false;
   bool _obscurePassword = true;
+
   void _togglePasswordVisibility() {
     setState(() {
       _obscurePassword = !_obscurePassword;
@@ -167,25 +168,35 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
               SignInButton(
                 Buttons.google,
-                text: "Signup with Google",
+                text: "Login with Google",
                 onPressed: _googleLogin,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               const SizedBox(height: 20),
-              TextButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => AdminLoginScreen()),
                   );
                 },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.teal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
                 child: const Text(
                   'Admin Login',
-                  style: TextStyle(color: Colors.teal),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
+              const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
                   Navigator.push(

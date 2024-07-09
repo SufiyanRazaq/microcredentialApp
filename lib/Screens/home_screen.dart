@@ -1,19 +1,35 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:microcredential/Screens/evidence.dart';
-import 'package:microcredential/Screens/Authentication/login_screen.dart';
 import 'Authentication/profile_screen.dart';
 import 'learning_module_screen.dart';
 import 'credential_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Future<void> _logout(BuildContext context) async {
-    await _auth.signOut();
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => LoginScreen()));
+
+  Widget _buildMenuButton(
+      BuildContext context, String title, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.teal,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -21,82 +37,90 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Home'),
+        title: const Text(
+          'Home',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
       ),
-      body: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () => _logout(context),
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.red,
-              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Expanded(
+              child: StreamBuilder(
+                stream: _firestore.collection('credentials').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  var credentials = snapshot.data!.docs;
+                  return ListView.builder(
+                    itemCount: credentials.length,
+                    itemBuilder: (context, index) {
+                      var credential = credentials[index];
+                      return ListTile(
+                        title: Text(credential['name']),
+                        subtitle: Text(credential['description']),
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EvidenceSubmissionScreen(
+                                  credentialId: credential.id,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Submit Evidence',
+                              style: TextStyle(fontSize: 16)),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            child: const Text('Logout', style: TextStyle(fontSize: 16)),
-          ),
-          Expanded(
-            child: StreamBuilder(
-              stream: _firestore.collection('credentials').snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return CircularProgressIndicator();
-                }
-                var credentials = snapshot.data!.docs;
-                return ListView.builder(
-                  itemCount: credentials.length,
-                  itemBuilder: (context, index) {
-                    var credential = credentials[index];
-                    return ListTile(
-                      title: Text(credential['name']),
-                      subtitle: Text(credential['description']),
-                      trailing: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EvidenceSubmissionScreen(
-                                credentialId: credential.id,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Text('Submit Evidence'),
-                      ),
-                    );
-                  },
-                );
-              },
+            const SizedBox(height: 20),
+            _buildMenuButton(
+              context,
+              'Manage Credentials',
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CredentialCreationScreen()),
+              ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CredentialCreationScreen()));
-            },
-            child: Text('Manage Credentials'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => LearningModuleScreen()));
-            },
-            child: Text('Learning Modules'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ProfileScreen()));
-            },
-            child: Text('Profile'),
-          ),
-        ],
+            const SizedBox(height: 20),
+            _buildMenuButton(
+              context,
+              'Learning Modules',
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LearningModuleScreen()),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildMenuButton(
+              context,
+              'Profile',
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

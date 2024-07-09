@@ -10,13 +10,13 @@ class LearningModuleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Learning Modules'),
+        title: const Text('Learning Modules'),
       ),
       body: Column(
         children: [
           TextField(
             controller: _searchController,
-            decoration: InputDecoration(labelText: 'Search Modules'),
+            decoration: const InputDecoration(labelText: 'Search Modules'),
             onChanged: (value) {
               // Trigger UI update
             },
@@ -26,7 +26,7 @@ class LearningModuleScreen extends StatelessWidget {
               stream: _firestore.collection('learning_modules').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
                 var modules = snapshot.data!.docs;
                 return ListView.builder(

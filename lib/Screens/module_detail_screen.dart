@@ -10,7 +10,7 @@ class ModuleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Module Details'),
+        title: const Text('Module Details'),
       ),
       body: FutureBuilder(
         future: FirebaseFirestore.instance
@@ -19,16 +19,16 @@ class ModuleDetailScreen extends StatelessWidget {
             .get(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
           var module = snapshot.data!;
           return ListView(
             children: [
-              Text(module['title'], style: TextStyle(fontSize: 24)),
+              Text(module['title'], style: const TextStyle(fontSize: 24)),
               Text(module['content']),
               ElevatedButton(
                 onPressed: () {},
-                child: Text('Mark as Complete'),
+                child: const Text('Mark as Complete'),
               ),
             ],
           );
