@@ -130,9 +130,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         if (_isUploading)
                           const Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: CircularProgressIndicator(),
+                            top: 35,
+                            left: 60,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                            ),
                           ),
                         Positioned(
                           bottom: 20,

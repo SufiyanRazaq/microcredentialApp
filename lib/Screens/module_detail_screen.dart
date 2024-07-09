@@ -25,11 +25,7 @@ class ModuleDetailScreen extends StatelessWidget {
           return ListView(
             children: [
               Text(module['title'], style: const TextStyle(fontSize: 24)),
-              Text(module['content']),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Mark as Complete'),
-              ),
+              Text(module['description']),
             ],
           );
         },
