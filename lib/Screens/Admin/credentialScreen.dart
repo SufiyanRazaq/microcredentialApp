@@ -12,7 +12,7 @@ class _AdminCredentialCreationScreenState
     extends State<AdminCredentialCreationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  List<TextEditingController> _requirementsControllers = [];
+  final List<TextEditingController> _requirementsControllers = [];
 
   Future<void> _createCredential() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -50,7 +50,17 @@ class _AdminCredentialCreationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin - Create Credential'),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Admin - Create Credential',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.teal,
       ),
       body: SingleChildScrollView(
@@ -105,7 +115,7 @@ class _AdminCredentialCreationScreenState
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.remove_circle, color: Colors.red),
+                    icon: const Icon(Icons.remove_circle, color: Colors.red),
                     onPressed: () {
                       setState(() {
                         _requirementsControllers.removeAt(index);
@@ -128,9 +138,14 @@ class _AdminCredentialCreationScreenState
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(_requirementsControllers.isEmpty
-                  ? 'Add Requirement'
-                  : 'Add More Requirements'),
+              child: Text(
+                _requirementsControllers.isEmpty
+                    ? 'Add Requirement'
+                    : 'Add More Requirements',
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -143,8 +158,13 @@ class _AdminCredentialCreationScreenState
                 padding:
                     const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
-              child: const Text('Create Credential',
-                  style: TextStyle(fontSize: 16)),
+              child: const Text(
+                'Create Credential',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),

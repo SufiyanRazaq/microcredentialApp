@@ -19,13 +19,14 @@ class VerifyEvidenceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Verify Evidence'),
+        title: const Text('Verify Evidence'),
+        backgroundColor: Colors.teal,
       ),
       body: StreamBuilder(
         stream: _firestore.collection('submissions').snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
           var submissions = snapshot.data!.docs;
           return ListView.builder(
@@ -39,7 +40,14 @@ class VerifyEvidenceScreen extends StatelessWidget {
                     ? null
                     : ElevatedButton(
                         onPressed: () => _approveEvidence(submission.id),
-                        child: Text('Approve'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Approve',
+                            style: TextStyle(fontSize: 16)),
                       ),
               );
             },
@@ -48,6 +56,38 @@ class VerifyEvidenceScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class Submission {
+  String id;
+  String userId;
+  String credentialId;
+  String evidenceUrl;
+  bool approved;
+
+  Submission({
+    required this.id,
+    required this.userId,
+    required this.credentialId,
+    required this.evidenceUrl,
+    this.approved = false,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'credentialId': credentialId,
+      'evidenceUrl': evidenceUrl,
+      'approved': approved,
+    };
+  }
+
+  Submission.fromFirestore(DocumentSnapshot doc)
+      : id = doc.id,
+        userId = doc['userId'],
+        credentialId = doc['credentialId'],
+        evidenceUrl = doc['evidenceUrl'],
+        approved = doc['approved'];
 }
 
 class EvidenceSubmissionScreen extends StatefulWidget {
@@ -91,7 +131,7 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
         'submittedAt': Timestamp.now(),
       });
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Evidence submitted successfully')));
+          const SnackBar(content: Text('Evidence submitted successfully')));
       _evidenceController.clear();
       setState(() {
         _pickedFile = null;
@@ -117,19 +157,35 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Submit Evidence')),
+      appBar: AppBar(
+        title: const Text('Submit Evidence'),
+        backgroundColor: Colors.teal,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _evidenceController,
-              decoration: InputDecoration(labelText: 'Evidence Description'),
+              decoration: const InputDecoration(
+                  labelText: 'Evidence Description',
+                  border: OutlineInputBorder()),
+              maxLines: 3,
             ),
             const SizedBox(height: 15),
             ElevatedButton(
               onPressed: _pickFile,
-              child: Text('Pick Evidence File'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              child: const Text('Pick Evidence File',
+                  style: TextStyle(fontSize: 16)),
             ),
             if (_pickedFile != null)
               Padding(
@@ -138,7 +194,16 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
               ),
             ElevatedButton(
               onPressed: _submitEvidence,
-              child: Text('Submit Evidence'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              ),
+              child:
+                  const Text('Submit Evidence', style: TextStyle(fontSize: 16)),
             ),
             if (_uploadTask != null)
               StreamBuilder<TaskSnapshot>(
@@ -181,7 +246,7 @@ class ReviewSubmissionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Review Submissions')),
+      appBar: AppBar(title: const Text('Review Submissions')),
       body: StreamBuilder(
         stream: _firestore
             .collection('submissions')
@@ -189,7 +254,7 @@ class ReviewSubmissionsScreen extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           var submissions = snapshot.data!.docs;
           return ListView.builder(
@@ -203,7 +268,7 @@ class ReviewSubmissionsScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.check, color: Colors.green),
+                      icon: const Icon(Icons.check, color: Colors.green),
                       onPressed: () => _updateSubmissionStatus(
                           submission.id,
                           'Approved',
@@ -211,7 +276,7 @@ class ReviewSubmissionsScreen extends StatelessWidget {
                           submission['credentialId']),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: Colors.red),
+                      icon: const Icon(Icons.close, color: Colors.red),
                       onPressed: () => _updateSubmissionStatus(
                           submission.id,
                           'Rejected',
@@ -227,36 +292,4 @@ class ReviewSubmissionsScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class Submission {
-  String id;
-  String userId;
-  String credentialId;
-  String evidenceUrl;
-  bool approved;
-
-  Submission({
-    required this.id,
-    required this.userId,
-    required this.credentialId,
-    required this.evidenceUrl,
-    this.approved = false,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'credentialId': credentialId,
-      'evidenceUrl': evidenceUrl,
-      'approved': approved,
-    };
-  }
-
-  Submission.fromFirestore(DocumentSnapshot doc)
-      : id = doc.id,
-        userId = doc['userId'],
-        credentialId = doc['credentialId'],
-        evidenceUrl = doc['evidenceUrl'],
-        approved = doc['approved'];
 }
