@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminCredentialCreationScreen extends StatefulWidget {
   @override
@@ -15,8 +14,22 @@ class _AdminCredentialCreationScreenState
   final List<TextEditingController> _requirementsControllers = [];
 
   Future<void> _createCredential() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    // Validation
+    if (_nameController.text.isEmpty) {
+      _showValidationMessage('Credential name is required.');
+      return;
+    }
+    if (_descriptionController.text.isEmpty) {
+      _showValidationMessage('Description is required.');
+      return;
+    }
+    if (_requirementsControllers.isEmpty ||
+        _requirementsControllers.any((controller) => controller.text.isEmpty)) {
+      _showValidationMessage('All requirements must be filled.');
+      return;
+    }
+
+    try {
       List<String> requirements = _requirementsControllers
           .map((controller) => controller.text)
           .toList();
@@ -25,8 +38,9 @@ class _AdminCredentialCreationScreenState
         'name': _nameController.text,
         'description': _descriptionController.text,
         'requirements': requirements,
-        'createdBy': user.uid,
+        'createdBy': 'Admin', // Assuming admin's name is used here
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Credential created successfully')));
       _nameController.clear();
@@ -35,7 +49,16 @@ class _AdminCredentialCreationScreenState
       setState(() {
         _requirementsControllers.clear();
       });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating credential: $e')));
     }
+  }
+
+  void _showValidationMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
