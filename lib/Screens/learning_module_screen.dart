@@ -16,7 +16,18 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Learning Modules'),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text('Learning Modules',
+            style: TextStyle(
+              color: Colors.white,
+            )),
+        backgroundColor: Colors.teal,
       ),
       body: Column(
         children: [
@@ -27,9 +38,12 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Search Modules',
-                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -104,14 +118,30 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 16),
-                        elevation: 2,
+                        elevation: 4,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: ListTile(
-                          title: Text(module['title']),
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: const CircleAvatar(
+                            backgroundColor: Colors.teal,
+                            child: Icon(
+                              Icons.book,
+                              color: Colors.white,
+                            ),
+                          ),
+                          title: Text(
+                            module['title'],
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           subtitle: Text(
-                              '${module['category']} - ${module['difficulty']}'),
+                            '${module['category']} - ${module['difficulty']}',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                           trailing: IconButton(
                             icon: Icon(
                               module['isFavorite']

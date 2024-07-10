@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +12,6 @@ class EvidenceSubmissionScreen extends StatefulWidget {
   const EvidenceSubmissionScreen({super.key, required this.credentialId});
 
   @override
-  // ignore: library_private_types_in_public_api
   _EvidenceSubmissionScreenState createState() =>
       _EvidenceSubmissionScreenState();
 }
@@ -44,7 +41,7 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
       await FirebaseFirestore.instance.collection('submissions').add({
         'userId': user.uid,
         'credentialId': widget.credentialId,
-        'evidence': _evidenceController.text,
+        'evidenceDescription': _evidenceController.text,
         'fileUrl': fileUrl,
         'status': 'Pending',
         'submittedAt': Timestamp.now(),
@@ -77,7 +74,12 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Submit Evidence'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text('Submit Evidence',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.teal,
       ),
       body: Padding(
@@ -104,13 +106,14 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
                     const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
               child: const Text('Pick Evidence File',
-                  style: TextStyle(fontSize: 16)),
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
             if (_pickedFile != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text('Picked file: ${_pickedFile!.name}'),
               ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _submitEvidence,
               style: ElevatedButton.styleFrom(
@@ -121,8 +124,8 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
-              child:
-                  const Text('Submit Evidence', style: TextStyle(fontSize: 16)),
+              child: const Text('Submit Evidence',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
             if (_uploadTask != null)
               StreamBuilder<TaskSnapshot>(
