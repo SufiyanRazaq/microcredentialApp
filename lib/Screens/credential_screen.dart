@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class CredentialCreationScreen extends StatefulWidget {
   @override
@@ -12,6 +15,7 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<TextEditingController> _requirementsControllers = [];
+  File? _badgeImage;
 
   Future<void> _createCredential() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -20,10 +24,16 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
           .map((controller) => controller.text)
           .toList();
 
+      String? badgeImageUrl;
+      if (_badgeImage != null) {
+        badgeImageUrl = await _uploadBadgeImage();
+      }
+
       await FirebaseFirestore.instance.collection('credentials').add({
         'name': _nameController.text,
         'description': _descriptionController.text,
         'requirements': requirements,
+        'badgeImageUrl': badgeImageUrl,
         'createdBy': user.uid,
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -31,7 +41,32 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
       _nameController.clear();
       _descriptionController.clear();
       _requirementsControllers.forEach((controller) => controller.clear());
+      setState(() {
+        _badgeImage = null;
+      });
     }
+  }
+
+  Future<void> _pickBadgeImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _badgeImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<String> _uploadBadgeImage() async {
+    final user = FirebaseAuth.instance.currentUser;
+    final fileExtension = _badgeImage!.path.split('.').last;
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('badges/${user!.uid}.$fileExtension');
+    final uploadTask = storageRef.putFile(_badgeImage!);
+
+    final snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
   }
 
   @override
@@ -82,6 +117,21 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
               ),
               maxLines: 3,
             ),
+            const SizedBox(height: 15),
+            ElevatedButton(
+              onPressed: _pickBadgeImage,
+              child: const Text('Pick Badge Image'),
+            ),
+            if (_badgeImage != null)
+              Column(
+                children: [
+                  const SizedBox(height: 15),
+                  Image.file(
+                    _badgeImage!,
+                    height: 100,
+                  ),
+                ],
+              ),
             const SizedBox(height: 15),
             Expanded(
               child: ListView.builder(

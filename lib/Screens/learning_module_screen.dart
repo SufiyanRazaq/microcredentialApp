@@ -75,7 +75,20 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                var modules = snapshot.data!.docs;
+
+                List<QueryDocumentSnapshot<Object?>> modules =
+                    snapshot.data!.docs;
+
+                // Add debug print to check the data
+                print('Number of modules: ${modules.length}');
+
+                // Remove duplicates based on document ID
+                var uniqueModules = <String, QueryDocumentSnapshot>{};
+                for (var module in modules) {
+                  uniqueModules[module.id] = module;
+                }
+                modules = uniqueModules.values.toList();
+
                 return ListView.builder(
                   itemCount: modules.length,
                   itemBuilder: (context, index) {

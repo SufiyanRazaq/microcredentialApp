@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:microcredential/Screens/learning_module_screen.dart';
 import 'dart:io';
 import 'login_screen.dart';
 
@@ -188,6 +189,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(user.email!),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Badges',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: FutureBuilder<QuerySnapshot>(
+                    future: _firestore
+                        .collection('badges')
+                        .where('userId', isEqualTo: user.uid)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+                      var badges = snapshot.data!.docs;
+                      if (badges.isEmpty) {
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        LearningModuleScreen()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 50, vertical: 15),
+                            ),
+                            child: const Text('Start Learning',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
+                          ),
+                        );
+                      } else {
+                        return GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 4.0,
+                            mainAxisSpacing: 4.0,
+                          ),
+                          itemCount: badges.length,
+                          itemBuilder: (context, index) {
+                            var badge = badges[index];
+                            return GridTile(
+                              child: Image.asset(
+                                badge['badgeImage'],
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
                 ),
                 const SizedBox(height: 20),
                 Center(
