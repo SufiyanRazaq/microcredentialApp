@@ -25,71 +25,75 @@ class AdminHomeScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: Column(
-            children: [
-              Image.asset(
-                'assets/logo.png',
-                height: 100,
-                width: 100,
-              ),
-              const SizedBox(height: 20),
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('submissions')
-                    .where('status', isEqualTo: 'Pending')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox.shrink();
-                  }
-                  int submissionCount = snapshot.data!.docs.length;
-                  return _buildMenuButton(
-                    context,
-                    'Review Submissions',
-                    Icons.assignment,
-                    () => Navigator.push(
+          child: SingleChildScrollView(
+            // Add SingleChildScrollView here
+            child: Column(
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  height: 100,
+                  width: 100,
+                ),
+                const SizedBox(height: 20),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('submissions')
+                      .where('status', isEqualTo: 'Pending')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox.shrink();
+                    }
+                    int submissionCount = snapshot.data!.docs.length;
+                    return _buildMenuButton(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => ReviewSubmissionsScreen()),
-                    ),
-                    submissionCount,
-                  );
-                },
-              ),
-              const SizedBox(height: 15),
-              _buildMenuButton(
-                context,
-                'Create Credentials',
-                Icons.badge,
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => AdminCredentialCreationScreen()),
+                      'Review Submissions',
+                      Icons.assignment,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ReviewSubmissionsScreen()),
+                      ),
+                      submissionCount,
+                    );
+                  },
                 ),
-              ),
-              const SizedBox(height: 15),
-              _buildMenuButton(
-                context,
-                'Profile',
-                Icons.person,
-                () => Navigator.push(
+                const SizedBox(height: 15),
+                _buildMenuButton(
                   context,
-                  MaterialPageRoute(builder: (context) => AdminProfileScreen()),
+                  'Create Credentials',
+                  Icons.badge,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AdminCredentialCreationScreen()),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 15),
-              _buildMenuButton(
-                context,
-                'Your Credentials',
-                Icons.view_list,
-                () => Navigator.push(
+                const SizedBox(height: 15),
+                _buildMenuButton(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          AdminCredentialsScreen(adminName: adminName)),
+                  'Profile',
+                  Icons.person,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AdminProfileScreen()),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 15),
+                _buildMenuButton(
+                  context,
+                  'Your Credentials',
+                  Icons.view_list,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AdminCredentialsScreen(adminName: adminName)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

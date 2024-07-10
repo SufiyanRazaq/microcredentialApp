@@ -193,18 +193,9 @@ class HomeScreen extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserCredentialsScreen(),
-                ),
-              ),
-            ),
-            _buildMenuButton(
-              context,
-              'Verified Users Submissions',
-              Icons.check_circle,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => VerifiedSubmissionsScreen(),
+                  builder: (context) => EvidenceSubmissionScreen(
+                    credentialId: 'credentials',
+                  ),
                 ),
               ),
             ),
@@ -267,15 +258,6 @@ class HomeScreen extends StatelessWidget {
 
 class UserCredentialsScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Future<Map<String, dynamic>> _getCreatorInfo(String userId) async {
-    DocumentSnapshot userDoc =
-        await _firestore.collection('users').doc(userId).get();
-    return {
-      'name': userDoc['name'],
-      'image': userDoc['profileImageUrl'] ?? '',
-    };
-  }
 
   Widget _buildCredentialCard(
       BuildContext context, DocumentSnapshot credential) {
@@ -605,6 +587,7 @@ class VerifiedSubmissionsScreen extends StatelessWidget {
         stream: _firestore
             .collection('credentials')
             .where('isVerified', isEqualTo: true)
+            .where('createdBy', isNotEqualTo: 'Admin')
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {

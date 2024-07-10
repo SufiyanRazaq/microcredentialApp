@@ -125,11 +125,17 @@ class ReviewSubmissionsScreen extends StatelessWidget {
         .doc(submissionId)
         .update({'status': status});
     if (status == 'Approved') {
-      await _firestore.collection('badges').add({
-        'userId': userId,
-        'credentialId': credentialId,
-        'issuedAt': Timestamp.now(),
-      });
+      DocumentSnapshot credentialDoc =
+          await _firestore.collection('credentials').doc(credentialId).get();
+      if (credentialDoc.exists) {
+        String badgeImageUrl = credentialDoc['badgeImageUrl'];
+        await _firestore.collection('badges').add({
+          'userId': userId,
+          'credentialId': credentialId,
+          'badgeImageUrl': badgeImageUrl,
+          'issuedAt': Timestamp.now(),
+        });
+      }
     }
   }
 

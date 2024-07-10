@@ -248,11 +248,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           itemCount: badges.length,
                           itemBuilder: (context, index) {
                             var badge = badges[index];
+                            var badgeData =
+                                badge.data() as Map<String, dynamic>?;
+
+                            var badgeImageUrl = badgeData != null &&
+                                    badgeData.containsKey('badgeImageUrl')
+                                ? badgeData['badgeImageUrl']
+                                : badgeData != null &&
+                                        badgeData.containsKey('badgeImage')
+                                    ? badgeData['badgeImage']
+                                    : 'assets/default_badge.png'; // Default image
+
                             return GridTile(
-                              child: Image.asset(
-                                badge['badgeImage'],
-                                fit: BoxFit.cover,
-                              ),
+                              child: badgeImageUrl.startsWith('assets/')
+                                  ? Image.asset(badgeImageUrl,
+                                      fit: BoxFit.cover)
+                                  : Image.network(badgeImageUrl,
+                                      fit: BoxFit.cover),
                             );
                           },
                         );

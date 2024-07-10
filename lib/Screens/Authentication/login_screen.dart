@@ -28,19 +28,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     try {
-      if (_emailController.text.trim().isEmpty) {
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
+
+      if (email.isEmpty) {
         _showSnackbar('Enter your email address', Colors.red);
         return;
-      } else if (!_isValidEmail(_emailController.text.trim())) {
+      } else if (!_isValidEmail(email)) {
         _showSnackbar('Enter valid email address', Colors.red);
         return;
-      } else if (_passwordController.text.trim().isEmpty) {
+      } else if (password.isEmpty) {
         _showSnackbar('Enter your password', Colors.red);
         return;
       }
 
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      // Check if the email belongs to an admin
+      final QuerySnapshot adminResult = await FirebaseFirestore.instance
+          .collection('admin_users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (adminResult.docs.isNotEmpty) {
+        _showSnackbar(
+            'This is an admin account. Please login through the admin login screen.',
+            Colors.red);
+        return;
+      }
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
       _showSnackbar('Incorrect email or password', Colors.red);
     }
@@ -71,8 +91,11 @@ class _LoginScreenState extends State<LoginScreen> {
               Colors.red);
           await _auth.signOut();
         } else {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => HomeScreen()));
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen()),
+            (Route<dynamic> route) => false,
+          );
         }
       }
     } catch (e) {
