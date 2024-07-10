@@ -6,8 +6,15 @@ class VerifyEvidenceScreen extends StatelessWidget {
 
   Future<void> _approveEvidence(String submissionId) async {
     await _firestore.collection('submissions').doc(submissionId).update({
-      'approved': true,
+      'status': 'Approved',
     });
+  }
+
+  Future<void> _rejectEvidence(String submissionId, String credentialId) async {
+    await _firestore.collection('submissions').doc(submissionId).update({
+      'status': 'Rejected',
+    });
+    await _firestore.collection('credentials').doc(credentialId).delete();
   }
 
   @override
@@ -28,22 +35,45 @@ class VerifyEvidenceScreen extends StatelessWidget {
             itemCount: submissions.length,
             itemBuilder: (context, index) {
               var submission = Submission.fromFirestore(submissions[index]);
-              return ListTile(
-                title: Text(submission.evidenceUrl),
-                subtitle: Text(submission.approved ? 'Approved' : 'Pending'),
-                trailing: submission.approved
-                    ? null
-                    : ElevatedButton(
-                        onPressed: () => _approveEvidence(submission.id),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Text(
+                    submission.evidenceUrl,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    submission.approved ? 'Approved' : 'Pending',
+                    style: TextStyle(
+                      color: submission.approved ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  trailing: submission.approved
+                      ? const Icon(Icons.check_circle, color: Colors.green)
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.check_circle,
+                                  color: Colors.green),
+                              onPressed: () => _approveEvidence(submission.id),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.cancel, color: Colors.red),
+                              onPressed: () => _rejectEvidence(
+                                  submission.id, submission.credentialId),
+                            ),
+                          ],
                         ),
-                        child: const Text('Approve',
-                            style: TextStyle(fontSize: 16)),
-                      ),
+                ),
               );
             },
           );
@@ -95,18 +125,35 @@ class ReviewSubmissionsScreen extends StatelessWidget {
         .doc(submissionId)
         .update({'status': status});
     if (status == 'Approved') {
-      await _firestore.collection('badges').add({
-        'userId': userId,
-        'credentialId': credentialId,
-        'issuedAt': Timestamp.now(),
-      });
+      DocumentSnapshot credentialDoc =
+          await _firestore.collection('credentials').doc(credentialId).get();
+      if (credentialDoc.exists) {
+        String badgeImageUrl = credentialDoc['badgeImageUrl'];
+        await _firestore.collection('badges').add({
+          'userId': userId,
+          'credentialId': credentialId,
+          'badgeImageUrl': badgeImageUrl,
+          'issuedAt': Timestamp.now(),
+        });
+      }
     }
+  }
+
+  Future<void> _rejectSubmission(
+      String submissionId, String credentialId) async {
+    await _firestore.collection('submissions').doc(submissionId).update({
+      'status': 'Rejected',
+    });
+    await _firestore.collection('credentials').doc(credentialId).delete();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Review Submissions')),
+      appBar: AppBar(
+        title: const Text('Review Submissions'),
+        backgroundColor: Colors.teal,
+      ),
       body: StreamBuilder(
         stream: _firestore
             .collection('submissions')
@@ -121,29 +168,44 @@ class ReviewSubmissionsScreen extends StatelessWidget {
             itemCount: submissions.length,
             itemBuilder: (context, index) {
               var submission = submissions[index];
-              return ListTile(
-                title: Text(submission['evidence']),
-                subtitle: Text('User: ${submission['userId']}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check, color: Colors.green),
-                      onPressed: () => _updateSubmissionStatus(
-                          submission.id,
-                          'Approved',
-                          submission['userId'],
-                          submission['credentialId']),
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  title: Text(
+                    submission['evidenceDescription'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () => _updateSubmissionStatus(
-                          submission.id,
-                          'Rejected',
-                          submission['userId'],
-                          submission['credentialId']),
-                    ),
-                  ],
+                  ),
+                  subtitle: Text(
+                    'User: ${submission['userId']}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon:
+                            const Icon(Icons.check_circle, color: Colors.green),
+                        onPressed: () => _updateSubmissionStatus(
+                            submission.id,
+                            'Approved',
+                            submission['userId'],
+                            submission['credentialId']),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.cancel, color: Colors.red),
+                        onPressed: () => _rejectSubmission(
+                            submission.id, submission['credentialId']),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

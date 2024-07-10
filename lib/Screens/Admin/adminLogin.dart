@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:microcredential/Screens/Admin/HomeScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:microcredential/Screens/Admin/HomeScreen.dart'; // Update this import path to the correct one
 
 class AdminLoginScreen extends StatefulWidget {
   @override
@@ -80,8 +80,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isAdmin', true);
 
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => AdminHomeScreen()));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => AdminHomeScreen()),
+        (Route<dynamic> route) => false,
+      );
     } catch (e) {
       _showSnackbar('Login failed: ${e.toString()}', Colors.red);
       setState(() {
@@ -124,6 +127,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(

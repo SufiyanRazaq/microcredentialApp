@@ -40,7 +40,20 @@ class ModuleDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Module Details'),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Module Details',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
@@ -54,44 +67,77 @@ class ModuleDetailScreen extends StatelessWidget {
           var module = snapshot.data!;
           return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: [
-                Text(
-                  module['title'],
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      module['title'],
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      module['description'],
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Category: ${module['category']}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Difficulty: ${module['difficulty']}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Requirements:',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...List<Widget>.from(
+                        module['requirements'].map((req) => Text('- $req'))),
+                    const SizedBox(height: 30),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () => _startAssignment(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Start Assignment',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  module['description'],
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Category: ${module['category']}',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Difficulty: ${module['difficulty']}',
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Requirements:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                ...List<Widget>.from(
-                    module['requirements'].map((req) => Text('- $req'))),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () => _startAssignment(context),
-                  child: const Text('Start Assignment'),
-                ),
-              ],
+              ),
             ),
           );
         },
@@ -242,7 +288,20 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Assignment'),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Assignment',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
       ),
       body: FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance
@@ -282,61 +341,71 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                     var options = shuffledOptions[index];
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Question ${index + 1}/${assignments.length}',
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            currentQuestion['question'],
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 10),
-                          ...options.map<Widget>((option) {
-                            Color? optionColor;
-                            if (selectedAnswer != null) {
-                              if (option == selectedAnswer) {
-                                optionColor = isAnswerCorrect!
-                                    ? Colors.green
-                                    : Colors.red;
-                              }
-                            }
-                            return GestureDetector(
-                              onTap: () {
-                                if (selectedAnswer == null) {
-                                  _selectAnswer(option);
-                                }
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 5),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: optionColor ?? Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  option,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Question ${index + 1}/${assignments.length}',
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                            );
-                          }).toList(),
-                          const SizedBox(height: 20),
-                          Text(
-                            'Correct Answers: $correctAnswers',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                              const SizedBox(height: 10),
+                              Text(
+                                currentQuestion['question'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(height: 10),
+                              ...options.map<Widget>((option) {
+                                Color? optionColor;
+                                if (selectedAnswer != null) {
+                                  if (option == selectedAnswer) {
+                                    optionColor = isAnswerCorrect!
+                                        ? Colors.green
+                                        : Colors.red;
+                                  }
+                                }
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (selectedAnswer == null) {
+                                      _selectAnswer(option);
+                                    }
+                                  },
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: optionColor ?? Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      option,
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              const SizedBox(height: 20),
+                              Text(
+                                'Correct Answers: $correctAnswers',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                'Wrong Answers: $wrongAnswers',
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'Wrong Answers: $wrongAnswers',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   },

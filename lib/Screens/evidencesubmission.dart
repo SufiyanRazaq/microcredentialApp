@@ -1,7 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,7 +11,6 @@ class EvidenceSubmissionScreen extends StatefulWidget {
   const EvidenceSubmissionScreen({super.key, required this.credentialId});
 
   @override
-  // ignore: library_private_types_in_public_api
   _EvidenceSubmissionScreenState createState() =>
       _EvidenceSubmissionScreenState();
 }
@@ -23,6 +19,7 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   final TextEditingController _evidenceController = TextEditingController();
   PlatformFile? _pickedFile;
   UploadTask? _uploadTask;
+  bool _isSubmitting = false;
 
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles();
@@ -34,26 +31,46 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   }
 
   Future<void> _submitEvidence() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String? fileUrl;
-      if (_pickedFile != null) {
-        fileUrl = await _uploadFile(_pickedFile!);
-      }
-
-      await FirebaseFirestore.instance.collection('submissions').add({
-        'userId': user.uid,
-        'credentialId': widget.credentialId,
-        'evidence': _evidenceController.text,
-        'fileUrl': fileUrl,
-        'status': 'Pending',
-        'submittedAt': Timestamp.now(),
-      });
+    if (_evidenceController.text.isEmpty || _pickedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Evidence submitted successfully')));
-      _evidenceController.clear();
+          const SnackBar(content: Text('All fields are required')));
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        String? fileUrl;
+        if (_pickedFile != null) {
+          fileUrl = await _uploadFile(_pickedFile!);
+        }
+
+        await FirebaseFirestore.instance.collection('submissions').add({
+          'userId': user.uid,
+          'credentialId': widget.credentialId,
+          'evidenceDescription': _evidenceController.text,
+          'fileUrl': fileUrl,
+          'status': 'Pending',
+          'submittedAt': Timestamp.now(),
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Evidence submitted successfully')));
+        _evidenceController.clear();
+        setState(() {
+          _pickedFile = null;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error submitting evidence: $e')));
+    } finally {
       setState(() {
-        _pickedFile = null;
+        _isSubmitting = false;
       });
     }
   }
@@ -74,13 +91,24 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
   }
 
   @override
+  void dispose() {
+    _evidenceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Submit Evidence'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text('Submit Evidence',
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.teal,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,36 +121,46 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
               maxLines: 3,
             ),
             const SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: _pickFile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: _pickFile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                child: const Text('Pick Evidence File',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
-              child: const Text('Pick Evidence File',
-                  style: TextStyle(fontSize: 16)),
             ),
             if (_pickedFile != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text('Picked file: ${_pickedFile!.name}'),
               ),
-            ElevatedButton(
-              onPressed: _submitEvidence,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 10),
+            Center(
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _submitEvidence,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text('Submit Evidence',
+                        style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
-              child:
-                  const Text('Submit Evidence', style: TextStyle(fontSize: 16)),
             ),
             if (_uploadTask != null)
               StreamBuilder<TaskSnapshot>(
