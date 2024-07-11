@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 class VerifyEvidenceScreen extends StatelessWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> _approveEvidence(String submissionId) async {
+  Future<void> _approveEvidence(
+      String submissionId, String credentialId) async {
     await _firestore.collection('submissions').doc(submissionId).update({
       'status': 'Approved',
+    });
+    await _firestore.collection('credentials').doc(credentialId).update({
+      'isVerified': true,
     });
   }
 
@@ -64,7 +68,8 @@ class VerifyEvidenceScreen extends StatelessWidget {
                             IconButton(
                               icon: const Icon(Icons.check_circle,
                                   color: Colors.green),
-                              onPressed: () => _approveEvidence(submission.id),
+                              onPressed: () => _approveEvidence(
+                                  submission.id, submission.credentialId),
                             ),
                             IconButton(
                               icon: const Icon(Icons.cancel, color: Colors.red),
@@ -81,9 +86,7 @@ class VerifyEvidenceScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class Submission {
+}class Submission {
   String id;
   String userId;
   String credentialId;
@@ -129,6 +132,9 @@ class ReviewSubmissionsScreen extends StatelessWidget {
           await _firestore.collection('credentials').doc(credentialId).get();
       if (credentialDoc.exists) {
         String badgeImageUrl = credentialDoc['badgeImageUrl'];
+        await _firestore.collection('credentials').doc(credentialId).update({
+          'isVerified': true,
+        });
         await _firestore.collection('badges').add({
           'userId': userId,
           'credentialId': credentialId,

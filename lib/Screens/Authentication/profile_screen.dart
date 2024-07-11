@@ -68,6 +68,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> _getVerifiedBadges(String userId) async {
+    QuerySnapshot badgeSnapshot = await _firestore
+        .collection('badges')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    List<Map<String, dynamic>> verifiedBadges = [];
+
+    for (var badge in badgeSnapshot.docs) {
+      var badgeData = badge.data() as Map<String, dynamic>;
+      var credentialId = badgeData['credentialId'] as String;
+      DocumentSnapshot credentialSnapshot =
+          await _firestore.collection('credentials').doc(credentialId).get();
+
+      if (credentialSnapshot.exists) {
+        var credentialData = credentialSnapshot.data() as Map<String, dynamic>;
+        if (credentialData['isVerified'] == true) {
+          verifiedBadges.add(badgeData);
+        }
+      }
+    }
+
+    return verifiedBadges;
+  }
+
   @override
   Widget build(BuildContext context) {
     final User user = _auth.currentUser!;
@@ -200,11 +225,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: FutureBuilder<QuerySnapshot>(
-                    future: _firestore
-                        .collection('badges')
-                        .where('userId', isEqualTo: user.uid)
-                        .get(),
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: _getVerifiedBadges(user.uid),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -212,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       }
-                      var badges = snapshot.data!.docs;
+                      var badges = snapshot.data ?? [];
                       if (badges.isEmpty) {
                         return Center(
                           child: ElevatedButton(
@@ -248,15 +270,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           itemCount: badges.length,
                           itemBuilder: (context, index) {
                             var badge = badges[index];
-                            var badgeData =
-                                badge.data() as Map<String, dynamic>?;
-
-                            var badgeImageUrl = badgeData != null &&
-                                    badgeData.containsKey('badgeImageUrl')
-                                ? badgeData['badgeImageUrl']
-                                : badgeData != null &&
-                                        badgeData.containsKey('badgeImage')
-                                    ? badgeData['badgeImage']
+                            var badgeImageUrl = badge
+                                    .containsKey('badgeImageUrl')
+                                ? badge['badgeImageUrl']
+                                : badge.containsKey('badgeImage')
+                                    ? badge['badgeImage']
                                     : 'assets/default_badge.png'; // Default image
 
                             return GridTile(

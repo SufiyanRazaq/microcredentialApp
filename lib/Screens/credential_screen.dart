@@ -36,7 +36,6 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Retrieve user information from Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -58,7 +57,7 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
           'description': _descriptionController.text,
           'requirements': requirements,
           'badgeImageUrl': badgeImageUrl,
-          'createdBy': userName, // Store the user name instead of the user ID
+          'createdBy': userName,
           'isVerified': false,
         });
 
