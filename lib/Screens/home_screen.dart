@@ -406,30 +406,57 @@ class UserSubmissionsScreen extends StatelessWidget {
     }
   }
 
+  Future<List<DocumentSnapshot>> _getVerifiedCredentials(String userId) async {
+    QuerySnapshot submissionsSnapshot = await _firestore
+        .collection('submissions')
+        .where('userId', isEqualTo: userId)
+        .get();
+
+    List<DocumentSnapshot> verifiedCredentials = [];
+
+    for (var submission in submissionsSnapshot.docs) {
+      var submissionData = submission.data() as Map<String, dynamic>?;
+      if (submissionData == null) continue;
+
+      var credentialId = submissionData['credentialId'] as String;
+      DocumentSnapshot credentialSnapshot =
+          await _firestore.collection('credentials').doc(credentialId).get();
+
+      if (credentialSnapshot.exists) {
+        var credentialData = credentialSnapshot.data() as Map<String, dynamic>?;
+        if (credentialData != null && credentialData['isVerified'] == true) {
+          verifiedCredentials.add(credentialSnapshot);
+        }
+      }
+    }
+
+    return verifiedCredentials;
+  }
+
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Evidence Submissions'),
+        title: const Text('My Verified Credentials'),
         backgroundColor: Colors.teal,
       ),
-      body: StreamBuilder(
-        stream: _firestore
-            .collection('submissions')
-            .where('userId', isEqualTo: user?.uid)
-            .snapshots(),
+      body: FutureBuilder<List<DocumentSnapshot>>(
+        future: _getVerifiedCredentials(user!.uid),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          var submissions = snapshot.data!.docs;
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          var credentials = snapshot.data ?? [];
           return ListView.builder(
-            itemCount: submissions.length,
+            itemCount: credentials.length,
             itemBuilder: (context, index) {
-              var submission = submissions[index];
-              _checkRejectionStatus(context, submission);
+              var credential = credentials[index];
+              var credentialData = credential.data() as Map<String, dynamic>?;
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 elevation: 4,
@@ -442,36 +469,32 @@ class UserSubmissionsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        submission['evidenceDescription'] ?? 'No description',
+                        credentialData?['name'] ?? 'No name',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      if (submission.data().containsKey('fileUrl'))
+                      Text(
+                        credentialData?['description'] ?? 'No description',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 10),
+                      if (credentialData != null &&
+                          credentialData.containsKey('badgeImageUrl'))
                         Container(
                           height: 200,
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
-                              image: NetworkImage(submission['fileUrl']),
+                              image:
+                                  NetworkImage(credentialData['badgeImageUrl']),
                               fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                      const SizedBox(height: 10),
-                      Text(
-                        submission['status'],
-                        style: TextStyle(
-                          color: submission['status'] == 'Approved'
-                              ? Colors.green
-                              : submission['status'] == 'Rejected'
-                                  ? Colors.red
-                                  : Colors.orange,
-                        ),
-                      ),
                     ],
                   ),
                 ),
