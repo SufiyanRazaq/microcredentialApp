@@ -86,7 +86,9 @@ class VerifyEvidenceScreen extends StatelessWidget {
       ),
     );
   }
-}class Submission {
+}
+
+class Submission {
   String id;
   String userId;
   String credentialId;
@@ -132,9 +134,6 @@ class ReviewSubmissionsScreen extends StatelessWidget {
           await _firestore.collection('credentials').doc(credentialId).get();
       if (credentialDoc.exists) {
         String badgeImageUrl = credentialDoc['badgeImageUrl'];
-        await _firestore.collection('credentials').doc(credentialId).update({
-          'isVerified': true,
-        });
         await _firestore.collection('badges').add({
           'userId': userId,
           'credentialId': credentialId,
