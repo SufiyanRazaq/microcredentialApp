@@ -9,6 +9,7 @@ class AdminProfileScreen extends StatelessWidget {
   Future<void> _logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('isAdmin');
+    await prefs.remove('adminEmail');
 
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => LoginScreen()));

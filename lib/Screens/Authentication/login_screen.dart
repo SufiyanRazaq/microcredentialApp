@@ -42,7 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Check if the email belongs to an admin
       final QuerySnapshot adminResult = await FirebaseFirestore.instance
           .collection('admin_users')
           .where('email', isEqualTo: email)
@@ -142,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 150,
                 width: 180,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(

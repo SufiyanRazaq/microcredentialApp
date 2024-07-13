@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AdminCredentialsScreen extends StatelessWidget {
+class AdminCredentialsView extends StatelessWidget {
   final String adminName;
 
-  AdminCredentialsScreen({required this.adminName});
+  AdminCredentialsView({required this.adminName});
 
   @override
   Widget build(BuildContext context) {
@@ -42,35 +42,64 @@ class AdminCredentialsScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 var credential = credentials[index];
                 return Card(
-                  elevation: 2,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    title: Text(
-                      credential['name'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Column(
+                  elevation: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 5),
+                        Text(
+                          credential['name'],
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.teal,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Text(
                           credential['description'],
-                          style: const TextStyle(fontSize: 14),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         const Text(
                           'Requirements:',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
+                        const SizedBox(height: 5),
                         ...List<String>.from(credential['requirements'])
-                            .map((requirement) => Text('- $requirement'))
+                            .map(
+                              (requirement) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 2.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.check,
+                                        size: 16, color: Colors.teal),
+                                    const SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        requirement,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
                             .toList(),
                       ],
                     ),

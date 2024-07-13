@@ -113,28 +113,40 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Evidence Description',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal),
+            ),
+            const SizedBox(height: 10),
             TextField(
               controller: _evidenceController,
               decoration: const InputDecoration(
-                  labelText: 'Evidence Description',
-                  border: OutlineInputBorder()),
+                border: OutlineInputBorder(),
+                hintText: 'Enter a description of your evidence',
+              ),
               maxLines: 3,
             ),
             const SizedBox(height: 15),
+            const Divider(),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: _pickFile,
+                icon: const Icon(Icons.attach_file, color: Colors.white),
+                label: const Text(
+                  'Pick Evidence File',
+                  style: TextStyle(color: Colors.white),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
+                  minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                child: const Text('Pick Evidence File',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
             if (_pickedFile != null)
@@ -148,11 +160,10 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
                 onPressed: _isSubmitting ? null : _submitEvidence,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
+                  minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
                 child: _isSubmitting
                     ? const CircularProgressIndicator(
@@ -169,7 +180,10 @@ class _EvidenceSubmissionScreenState extends State<EvidenceSubmissionScreen> {
                   if (snapshot.hasData) {
                     final data = snapshot.data!;
                     double progress = data.bytesTransferred / data.totalBytes;
-                    return LinearProgressIndicator(value: progress);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: LinearProgressIndicator(value: progress),
+                    );
                   } else {
                     return Container();
                   }
