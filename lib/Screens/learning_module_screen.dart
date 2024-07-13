@@ -32,7 +32,7 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
@@ -40,7 +40,7 @@ class _LearningModuleScreenState extends State<LearningModuleScreen> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       labelText: 'Search Modules',
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search, color: Colors.teal),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

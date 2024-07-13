@@ -26,8 +26,8 @@ class AdminHomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: SingleChildScrollView(
-            // Add SingleChildScrollView here
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset(
                   'assets/logo.png',
@@ -89,7 +89,7 @@ class AdminHomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            AdminCredentialsScreen(adminName: adminName)),
+                            AdminCredentialsView(adminName: adminName)),
                   ),
                 ),
               ],
@@ -104,17 +104,18 @@ class AdminHomeScreen extends StatelessWidget {
       BuildContext context, String title, IconData icon, VoidCallback onPressed,
       [int? badgeCount]) {
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
         leading: Icon(icon, color: Colors.teal, size: 30),
         title: Text(
           title,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),

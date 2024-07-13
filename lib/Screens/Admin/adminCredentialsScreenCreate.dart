@@ -39,7 +39,7 @@ class AdminCredentialsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -57,7 +57,8 @@ class AdminCredentialsScreen extends StatelessWidget {
                     const SizedBox(width: 10),
                     Text(
                       createdByName,
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -65,12 +66,14 @@ class AdminCredentialsScreen extends StatelessWidget {
                 Text(
                   credential['name'],
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   credential['description'],
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16, color: Colors.black54),
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -82,7 +85,8 @@ class AdminCredentialsScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Text(
                       '- $requirement',
-                      style: const TextStyle(fontSize: 16),
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   );
                 }).toList(),
@@ -105,6 +109,8 @@ class AdminCredentialsScreen extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
                       ),
                       child: const Text('Submit Evidence',
                           style: TextStyle(fontSize: 16)),

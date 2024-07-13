@@ -76,9 +76,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         return;
       }
 
-      // Save admin state in SharedPreferences
+      // Save admin state and email in SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isAdmin', true);
+      await prefs.setString('adminEmail', email);
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -139,7 +140,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 height: 150,
                 width: 180,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -185,7 +186,11 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 ),
                 child: const Text('Login', style: TextStyle(fontSize: 16)),
               ),
-              if (loading) const CircularProgressIndicator(),
+              if (loading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: CircularProgressIndicator(),
+                ),
               const SizedBox(height: 30),
             ],
           ),

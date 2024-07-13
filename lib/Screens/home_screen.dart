@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:microcredential/Screens/Admin/adminCredentialsScreen.dart';
+import 'package:microcredential/Screens/Admin/adminCredentialsScreenCreate.dart';
 import 'package:microcredential/Screens/evidencesubmission.dart';
 import 'Authentication/profile_screen.dart';
 import 'learning_module_screen.dart';
@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildMenuButton(BuildContext context, String title, IconData icon,
       VoidCallback onPressed) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),

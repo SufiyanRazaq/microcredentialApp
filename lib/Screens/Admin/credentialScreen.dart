@@ -14,7 +14,6 @@ class _AdminCredentialCreationScreenState
   final List<TextEditingController> _requirementsControllers = [];
 
   Future<void> _createCredential() async {
-    // Validation
     if (_nameController.text.isEmpty) {
       _showValidationMessage('Credential name is required.');
       return;
@@ -38,7 +37,7 @@ class _AdminCredentialCreationScreenState
         'name': _nameController.text,
         'description': _descriptionController.text,
         'requirements': requirements,
-        'createdBy': 'Admin', // Assuming admin's name is used here
+        'createdBy': 'Admin',
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,108 +88,126 @@ class _AdminCredentialCreationScreenState
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              'assets/logo.png',
-              height: 100,
-              width: 100,
+            Center(
+              child: Image.asset(
+                'assets/logo.png',
+                height: 100,
+                width: 100,
+              ),
             ),
             const SizedBox(height: 20),
-            TextField(
+            const Text(
+              'Create a new credential by filling out the form below:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            _buildTextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Credential Name',
-                prefixIcon: Icon(Icons.badge, color: Colors.teal),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-              ),
+              labelText: 'Credential Name',
+              icon: Icons.badge,
             ),
             const SizedBox(height: 15),
-            TextField(
+            _buildTextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                prefixIcon: Icon(Icons.description, color: Colors.teal),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-              ),
+              labelText: 'Description',
+              icon: Icons.description,
+              maxLines: 3,
             ),
             const SizedBox(height: 15),
             ..._requirementsControllers.map((controller) {
               int index = _requirementsControllers.indexOf(controller);
-              return Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
                         controller: controller,
-                        decoration: const InputDecoration(
-                          labelText: 'Requirement',
-                          prefixIcon: Icon(Icons.list, color: Colors.teal),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
+                        labelText: 'Requirement',
+                        icon: Icons.list,
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        _requirementsControllers.removeAt(index);
-                      });
-                    },
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _requirementsControllers.removeAt(index);
+                        });
+                      },
+                    ),
+                  ],
+                ),
               );
             }).toList(),
-            const SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _requirementsControllers.add(TextEditingController());
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _requirementsControllers.add(TextEditingController());
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 ),
-              ),
-              child: Text(
-                _requirementsControllers.isEmpty
-                    ? 'Add Requirement'
-                    : 'Add More Requirements',
-                style: const TextStyle(
-                  color: Colors.white,
+                child: Text(
+                  _requirementsControllers.isEmpty
+                      ? 'Add Requirement'
+                      : 'Add More Requirements',
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _createCredential,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Center(
+              child: ElevatedButton(
+                onPressed: _createCredential,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              ),
-              child: const Text(
-                'Create Credential',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
+                child: const Text(
+                  'Create Credential',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: Icon(icon, color: Colors.teal),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        filled: true,
+        fillColor: Colors.grey[100],
       ),
     );
   }

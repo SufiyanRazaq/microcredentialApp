@@ -148,7 +148,10 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Credential Name',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                prefixIcon: Icon(Icons.badge, color: Colors.teal),
               ),
             ),
             const SizedBox(height: 15),
@@ -156,7 +159,10 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
               controller: _descriptionController,
               decoration: const InputDecoration(
                 labelText: 'Description',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                prefixIcon: Icon(Icons.description, color: Colors.teal),
               ),
               maxLines: 3,
             ),
@@ -187,9 +193,12 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
                       fit: BoxFit.cover,
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  LinearProgressIndicator(), // Indicating progress of image upload
                 ],
               ),
             const SizedBox(height: 15),
+            const Divider(),
             Column(
               children: List.generate(_requirementsControllers.length, (index) {
                 return Row(
@@ -201,7 +210,11 @@ class _CredentialCreationScreenState extends State<CredentialCreationScreen> {
                           controller: _requirementsControllers[index],
                           decoration: InputDecoration(
                             labelText: 'Requirement ${index + 1}',
-                            border: const OutlineInputBorder(),
+                            border: const OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                            ),
+                            prefixIcon: Icon(Icons.list, color: Colors.teal),
                           ),
                         ),
                       ),

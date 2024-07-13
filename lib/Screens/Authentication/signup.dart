@@ -43,25 +43,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String nameText = _nameController.text.trim();
 
       if (nameText.isEmpty) {
-        _showSnackbar("Enter your name", "Name", Colors.red);
+        _showSnackbar("Enter your name", Colors.red);
         return;
       } else if (emailText.isEmpty) {
-        _showSnackbar("Enter your email address", "Email address", Colors.red);
+        _showSnackbar("Enter your email address", Colors.red);
         return;
       } else if (!_isValidEmail(emailText)) {
-        _showSnackbar("Enter your valid email address", "Valid Email address",
-            Colors.red);
+        _showSnackbar("Enter a valid email address", Colors.red);
         return;
       } else if (passwordText.isEmpty) {
-        _showSnackbar("Enter your password", "Password", Colors.red);
+        _showSnackbar("Enter your password", Colors.red);
         return;
       } else if (passwordText.length < 6) {
-        _showSnackbar("Password cannot be less than six characters", "Password",
-            Colors.red);
+        _showSnackbar("Password must be at least 6 characters", Colors.red);
         return;
       } else if (passwordText != confirmPasswordText) {
-        _showSnackbar(
-            "Passwords do not match", "Password Mismatch", Colors.red);
+        _showSnackbar("Passwords do not match", Colors.red);
         return;
       }
 
@@ -78,7 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } catch (e) {
-      _showSnackbar('Sign up failed: ${e.toString()}', "Error", Colors.red);
+      _showSnackbar('Sign up failed: ${e.toString()}', Colors.red);
     }
   }
 
@@ -109,8 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             .get();
 
         if (userDoc.exists) {
-          _showSnackbar(
-              'Email already registered.', "Registration", Colors.red);
+          _showSnackbar('Email already registered.', Colors.red);
           await _auth.signOut();
         } else {
           // Create user document in Firestore
@@ -127,8 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
       }
     } catch (e) {
-      _showSnackbar(
-          'Google signup failed: ${e.toString()}', "Error", Colors.red);
+      _showSnackbar('Google signup failed: ${e.toString()}', Colors.red);
     } finally {
       setState(() {
         loading = false;
@@ -141,9 +136,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return emailRegex.hasMatch(email);
   }
 
-  void _showSnackbar(String message, String title, Color backgroundColor) {
+  void _showSnackbar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('$title: $message'),
+      content: Text(message),
       backgroundColor: backgroundColor,
     ));
   }
